@@ -40,9 +40,17 @@ interface InviteFriendsFormProps {
   tournamentId?: number;
   tournamentName?: string;
   onClose?: () => void;
+  onBack?: () => void;
+  onSubmit?: (invitees: string[]) => void;
 }
 
-const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFriendsFormProps) => {
+const InviteFriendsForm = ({ 
+  tournamentId, 
+  tournamentName, 
+  onClose,
+  onBack,
+  onSubmit
+}: InviteFriendsFormProps) => {
   const { toast } = useToast();
   const [invitedFriends, setInvitedFriends] = useState<typeof mockFriends>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,12 +133,21 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
       // In a real app, this would be an API call to send invites
       console.log("Sending invites to:", invitedFriends);
       
+      // Get emails for onSubmit callback
+      const emails = invitedFriends.map(friend => friend.email);
+      
       // Mock successful invitation
       setTimeout(() => {
         toast({
           title: "Invites sent!",
           description: `Invitations sent to ${invitedFriends.length} people.`,
         });
+        
+        // Call the onSubmit callback if provided
+        if (onSubmit) {
+          onSubmit(emails);
+        }
+        
         setInvitedFriends([]);
         setIsSubmitting(false);
         if (onClose) onClose();
@@ -252,6 +269,11 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
       </div>
 
       <div className="flex justify-end space-x-2 pt-4 border-t border-border">
+        {onBack && (
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+        )}
         {onClose && (
           <Button variant="outline" onClick={onClose}>
             Cancel
