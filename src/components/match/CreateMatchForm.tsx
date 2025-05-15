@@ -1,136 +1,166 @@
-import { useState } from "react";
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
+import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar as CalendarIcon, Clock, MapPin, User, Users } from "lucide-react";
-import { format } from "date-fns";
-
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, CalendarIcon, Clock, MapPin, User, Users, X, Trophy, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 
+// Schema for form validation
 const formSchema = z.object({
-  date: z.date({
-    required_error: "A match date is required.",
+  title: z.string().min(3, {
+    message: "Title must be at least 3 characters.",
   }),
-  time: z.string().min(1, {
-    message: "A time is required.",
+  date: z.date({
+    required_error: "A date is required.",
+  }),
+  time: z.string({
+    required_error: "A time is required.",
   }),
   location: z.string().min(3, {
     message: "Location must be at least 3 characters.",
   }),
-  opponent: z.string({
-    required_error: "Please select an opponent.",
+  opponent: z.string().min(3, {
+    message: "Opponent must be at least 3 characters.",
   }),
-  partner: z.string().optional(),
-  opponentPartner: z.string().optional(),
-  tableQuality: z.string().optional(),
+  gameType: z.enum(["1v1", "2v2"], {
+    required_error: "Game type is required.",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Mock user data - in a real application this would come from an API
-const mockUsers = [
-  { id: "1", name: "Alex Müller", email: "alex@example.com", avatar: "/placeholder.svg", elo: 1850 },
-  { id: "2", name: "Sarah Wagner", email: "sarah@example.com", avatar: "/placeholder.svg", elo: 1820 },
-  { id: "3", name: "Tom Schmidt", email: "tom@example.com", avatar: "/placeholder.svg", elo: 1795 },
-  { id: "4", name: "Maria Fischer", email: "maria@example.com", avatar: "/placeholder.svg", elo: 1780 },
-  { id: "5", name: "Felix Bauer", email: "felix@example.com", avatar: "/placeholder.svg", elo: 1760 },
+// Demo users for inviting to a match
+const demoUsers = [
+  { id: "1", name: "Alex Johnson", email: "alex@example.com", avatar: "https://i.pravatar.cc/150?img=1", elo: 1750 },
+  { id: "2", name: "Sam Smith", email: "sam@example.com", avatar: "https://i.pravatar.cc/150?img=2", elo: 1650 },
+  { id: "3", name: "Jordan Lee", email: "jordan@example.com", avatar: "https://i.pravatar.cc/150?img=3", elo: 1820 },
+  { id: "4", name: "Casey Taylor", email: "casey@example.com", avatar: "https://i.pravatar.cc/150?img=4", elo: 1580 },
+  { id: "5", name: "Morgan Wilson", email: "morgan@example.com", avatar: "https://i.pravatar.cc/150?img=5", elo: 1700 },
 ];
 
 const CreateMatchForm = () => {
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [matchType, setMatchType] = useState<"singles" | "doubles">("singles");
+  const [step, setStep] = useState(1);
+  const [invitedUsers, setInvitedUsers] = useState<typeof demoUsers>([]);
+  const [teamMode, setTeamMode] = useState<"1v1" | "2v2">("1v1");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [matchData, setMatchData] = useState<Partial<FormValues> | null>(null);
 
+  // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      title: "",
+      date: new Date(),
       time: "18:00",
       location: "",
       opponent: "",
-      tableQuality: "4",
+      gameType: "1v1",
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to create a match.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const filteredUsers = demoUsers.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    if (!user?.isPremium) {
-      toast({
-        title: "Premium Feature",
-        description: "Creating matches requires a premium subscription.",
-        variant: "destructive",
-      });
-      navigate("/subscription");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // In a real app, this would be an API call to create the match
-      console.log("Creating match:", values);
-      
-      // Mock successful creation
-      setTimeout(() => {
+  const handleInviteUser = (user: typeof demoUsers[0]) => {
+    if (invitedUsers.find(u => u.id === user.id)) {
+      // Remove user if already invited
+      setInvitedUsers(invitedUsers.filter(u => u.id !== user.id));
+    } else {
+      // Add user to invited list
+      if ((teamMode === "1v1" && invitedUsers.length < 1) || 
+          (teamMode === "2v2" && invitedUsers.length < 3)) {
+        setInvitedUsers([...invitedUsers, user]);
+      } else {
         toast({
-          title: "Match created!",
-          description: "Your match has been created successfully.",
+          title: "Team is full",
+          description: `You can only invite ${teamMode === "1v1" ? "1" : "3"} player${teamMode === "2v2" ? "s" : ""} for ${teamMode} mode.`,
+          variant: "destructive",
         });
-        navigate("/profile");
-        setIsSubmitting(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error creating match:", error);
-      toast({
-        title: "Error",
-        description: "There was an error creating your match.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
+      }
     }
   };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  const isUserInvited = (userId: string) => {
+    return invitedUsers.some(user => user.id === userId);
+  };
+
+  // Handle form submission for the first step
+  const onSubmitFirstStep = (data: FormValues) => {
+    setMatchData(data);
+    setTeamMode(data.gameType);
+    setStep(2);
+  };
+
+  // Handle final submission
+  const onSubmitFinal = async () => {
+    if (!matchData) return;
+    
+    try {
+      // In a real app, this would send data to your backend
+      console.log("Match created with data:", matchData);
+      console.log("Invited users:", invitedUsers);
+      
+      toast({
+        title: "Match created!",
+        description: "Your match has been successfully created.",
+      });
+      
+      // Navigate to the matches page or view the new match
+      navigate("/matches/1");
+    } catch (error) {
+      console.error("Error creating match:", error);
+      toast({
+        title: "Error creating match",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const goBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
+  // Render the first step form
+  const renderFirstStepForm = () => (
+    <div>
+      <h2 className="text-2xl font-bold mb-6">Create New Match</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmitFirstStep)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Match Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Friendly Match" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="date"
@@ -142,16 +172,14 @@ const CreateMatchForm = () => {
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className={`w-full pl-3 text-left font-normal ${
-                            !field.value ? "text-muted-foreground" : ""
-                          }`}
+                          className={`w-full pl-3 text-left font-normal ${!field.value ? "text-muted-foreground" : ""}`}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
                             <span>Pick a date</span>
                           )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -160,6 +188,7 @@ const CreateMatchForm = () => {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
                         initialFocus
                       />
                     </PopoverContent>
@@ -174,15 +203,11 @@ const CreateMatchForm = () => {
               name="time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Time</FormLabel>
+                  <FormLabel>Match Time</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="time"
-                        className="pl-10"
-                        {...field}
-                      />
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input type="time" className="pl-10" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -199,205 +224,230 @@ const CreateMatchForm = () => {
                 <FormLabel>Location</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="TU München Main Campus" 
-                      className="pl-10"
-                      {...field} 
-                    />
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Student Union, Table #3" className="pl-10" {...field} />
                   </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="pt-4 border-t border-border">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold">Players</h3>
-            <div className="flex space-x-2">
-              <Button
-                type="button"
-                size="sm"
-                variant={matchType === "singles" ? "default" : "outline"}
-                onClick={() => setMatchType("singles")}
-              >
-                Singles
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={matchType === "doubles" ? "default" : "outline"}
-                onClick={() => setMatchType("doubles")}
-              >
-                Doubles
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Team 1</h4>
-                
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={userAvatar} alt={user?.name || "You"} />
-                      <AvatarFallback>{user?.name?.substring(0, 2) || "You"}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user?.name || "You"}</p>
-                      <p className="text-xs text-muted-foreground">ELO: {user?.elo || 1500}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {matchType === "doubles" && (
-                  <FormField
-                    control={form.control}
-                    name="partner"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your Partner</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a partner" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockUsers.map(user => (
-                              <SelectItem key={user.id} value={user.id}>
-                                <div className="flex items-center gap-2">
-                                  <span>{user.name}</span>
-                                  <span className="text-xs text-muted-foreground">({user.elo})</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Team 2</h4>
-                
-                <FormField
-                  control={form.control}
-                  name="opponent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Opponent</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select an opponent" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {mockUsers.map(user => (
-                            <SelectItem key={user.id} value={user.id}>
-                              <div className="flex items-center gap-2">
-                                <span>{user.name}</span>
-                                <span className="text-xs text-muted-foreground">({user.elo})</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                {matchType === "doubles" && (
-                  <FormField
-                    control={form.control}
-                    name="opponentPartner"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Opponent's Partner</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select opponent's partner" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockUsers
-                              .filter(u => u.id !== form.watch("opponent"))
-                              .map(user => (
-                                <SelectItem key={user.id} value={user.id}>
-                                  <div className="flex items-center gap-2">
-                                    <span>{user.name}</span>
-                                    <span className="text-xs text-muted-foreground">({user.elo})</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-border">
-          <h3 className="text-sm font-semibold mb-4">Table Information</h3>
-          
           <FormField
             control={form.control}
-            name="tableQuality"
+            name="gameType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Table Quality</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel>Game Type</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Rate the table quality" />
+                      <SelectValue placeholder="Select a game type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">⭐ Poor</SelectItem>
-                    <SelectItem value="2">⭐⭐ Fair</SelectItem>
-                    <SelectItem value="3">⭐⭐⭐ Good</SelectItem>
-                    <SelectItem value="4">⭐⭐⭐⭐ Very Good</SelectItem>
-                    <SelectItem value="5">⭐⭐⭐⭐⭐ Excellent</SelectItem>
+                    <SelectItem value="1v1">1v1 Single Player</SelectItem>
+                    <SelectItem value="2v2">2v2 Team Match</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Rate the quality of the kicker table you'll be playing on.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/profile")}
+          <div className="pt-4 flex justify-end">
+            <Button type="submit" className="rounded-full">
+              Continue to Invite Players
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+
+  // Render the second step (invite users) form
+  const renderInviteUsersForm = () => (
+    <div>
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={goBack} 
+          className="mr-2"
+        >
+          <X className="h-4 w-4 mr-1" /> Back
+        </Button>
+        <h2 className="text-2xl font-bold">Invite Players</h2>
+      </div>
+      
+      <div className="bg-muted/30 p-4 rounded-lg mb-6">
+        <h3 className="text-lg font-medium mb-2">Match Details</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Title</p>
+            <p>{matchData?.title}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Date & Time</p>
+            <p>{matchData?.date ? format(matchData.date, "PPP") : ""} at {matchData?.time}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Location</p>
+            <p>{matchData?.location}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Game Type</p>
+            <p>{matchData?.gameType === "1v1" ? "1v1 Single Player" : "2v2 Team Match"}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Invited Players ({invitedUsers.length}/{teamMode === "1v1" ? "1" : "3"})</h3>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            className="rounded-full"
           >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Match"}
+            <PlusCircle className="h-4 w-4 mr-1" /> Find Players
           </Button>
         </div>
-      </form>
-    </Form>
+        
+        {invitedUsers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {invitedUsers.map(user => (
+              <Card key={user.id} className="overflow-hidden">
+                <CardContent className="p-3 flex justify-between items-center">
+                  <div className="flex items-center">
+                    <Avatar className="h-10 w-10 mr-3">
+                      <img src={user.avatar} alt={user.name} />
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleInviteUser(user)}
+                  >
+                    <X className="h-4 w-4 text-destructive" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-muted/30 rounded-lg p-6 text-center">
+            <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+            <h4 className="text-lg font-medium">No Players Invited Yet</h4>
+            <p className="text-sm text-muted-foreground mb-4">Invite players to join your match</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(true)}
+              className="rounded-full"
+            >
+              Find Players
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <div className="pt-8 flex justify-end">
+        <Button
+          onClick={onSubmitFinal}
+          disabled={invitedUsers.length === 0}
+          className="rounded-full"
+        >
+          <Trophy className="mr-2 h-4 w-4" />
+          Create Match
+        </Button>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite Players</DialogTitle>
+            <DialogDescription>
+              Find and invite players to join your match.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="relative mb-4">
+              <Input
+                placeholder="Search by name or email"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+            
+            <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1">
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map(user => (
+                  <div 
+                    key={user.id}
+                    className={`flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-muted transition ${isUserInvited(user.id) ? 'bg-primary/10' : ''}`}
+                    onClick={() => handleInviteUser(user)}
+                  >
+                    <div className="flex items-center">
+                      <div className="relative">
+                        <Avatar className="h-10 w-10 mr-3">
+                          <img src={user.avatar} alt={user.name} />
+                        </Avatar>
+                      </div>
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="bg-muted px-2 py-1 rounded text-xs mr-2">
+                        ELO {user.elo}
+                      </div>
+                      {isUserInvited(user.id) ? (
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 border border-input rounded-full flex items-center justify-center">
+                          <PlusCircle className="h-4 w-4" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-muted-foreground">No users found</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+
+  // Render the appropriate step
+  return (
+    <div className="max-w-2xl mx-auto">
+      {step === 1 ? renderFirstStepForm() : renderInviteUsersForm()}
+    </div>
   );
 };
 
