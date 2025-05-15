@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
@@ -14,7 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarIcon, CalendarCheck, Users, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { InviteFriendsForm } from './InviteFriendsForm';
+import InviteFriendsForm from './InviteFriendsForm';
 
 // Schema for form validation
 const formSchema = z.object({
@@ -43,7 +42,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const CreateTournamentForm = () => {
+interface CreateTournamentFormProps {
+  onTournamentCreated?: (data: {id: number; name: string}) => void;
+}
+
+const CreateTournamentForm = ({ onTournamentCreated }: CreateTournamentFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -66,7 +69,20 @@ const CreateTournamentForm = () => {
   // Handle form submission for the first step
   const onSubmitFirstStep = (data: FormValues) => {
     setTournamentData(data);
-    setStep(2);
+    
+    // If we're in the context of a wizard (onTournamentCreated exists), use that
+    if (onTournamentCreated) {
+      // In a real app, this would make an API call first
+      // Mock creating a tournament with a random ID
+      const mockTournamentId = Math.floor(Math.random() * 1000);
+      onTournamentCreated({
+        id: mockTournamentId,
+        name: data.title
+      });
+    } else {
+      // Otherwise, continue to the next step in this component
+      setStep(2);
+    }
   };
 
   // Handle invitees submission and final form submission
@@ -301,7 +317,8 @@ const CreateTournamentForm = () => {
         <InviteFriendsForm 
           onBack={() => setStep(1)} 
           onSubmit={handleInviteesSubmit}
-          tournamentData={tournamentData}
+          tournamentId={0} // This will be replaced with real ID in production
+          tournamentName={tournamentData?.title}
         />
       )}
     </div>
