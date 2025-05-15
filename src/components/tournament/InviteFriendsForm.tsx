@@ -49,7 +49,7 @@ const InviteFriendsForm = ({
   tournamentName, 
   onClose,
   onBack,
-  onSubmit
+  onSubmit: submitInvites
 }: InviteFriendsFormProps) => {
   const { toast } = useToast();
   const [invitedFriends, setInvitedFriends] = useState<typeof mockFriends>([]);
@@ -64,7 +64,7 @@ const InviteFriendsForm = ({
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const handleAddEmail = async (values: FormValues) => {
     // Check if email is already in invited list
     if (invitedFriends.some(friend => friend.email === values.email)) {
       toast({
@@ -144,8 +144,8 @@ const InviteFriendsForm = ({
         });
         
         // Call the onSubmit callback if provided
-        if (onSubmit) {
-          onSubmit(emails);
+        if (submitInvites) {
+          submitInvites(emails);
         }
         
         setInvitedFriends([]);
@@ -176,7 +176,7 @@ const InviteFriendsForm = ({
 
       <div className="space-y-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleAddEmail)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
