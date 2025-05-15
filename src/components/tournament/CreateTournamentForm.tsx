@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -58,7 +57,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const CreateTournamentForm = () => {
+interface CreateTournamentFormProps {
+  onTournamentCreated?: (data: {id: number; name: string}) => void;
+}
+
+const CreateTournamentForm = ({ onTournamentCreated }: CreateTournamentFormProps) => {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -103,13 +106,26 @@ const CreateTournamentForm = () => {
       // In a real app, this would be an API call to create the tournament
       console.log("Creating tournament:", values);
       
-      // Mock successful creation
+      // Mock successful creation with a generated ID
       setTimeout(() => {
+        const mockedTournamentId = Math.floor(Math.random() * 1000) + 1;
+        
         toast({
           title: "Tournament created!",
           description: "Your tournament has been created successfully.",
         });
-        navigate("/tournaments");
+        
+        if (onTournamentCreated) {
+          // Pass the tournament data to the parent component
+          onTournamentCreated({
+            id: mockedTournamentId,
+            name: values.name
+          });
+        } else {
+          // If no callback is provided, navigate to tournaments list
+          navigate("/tournaments");
+        }
+        
         setIsSubmitting(false);
       }, 1000);
     } catch (error) {
@@ -356,7 +372,7 @@ const CreateTournamentForm = () => {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Tournament"}
+            {isSubmitting ? "Creating..." : "Continue"}
           </Button>
         </div>
       </form>

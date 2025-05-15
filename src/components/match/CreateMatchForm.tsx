@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -245,7 +244,7 @@ const CreateMatchForm = () => {
                 <div className="p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name || "You"} />
+                      <AvatarImage src={userAvatar} alt={user?.name || "You"} />
                       <AvatarFallback>{user?.name?.substring(0, 2) || "You"}</AvatarFallback>
                     </Avatar>
                     <div>
