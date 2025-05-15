@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -57,11 +56,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 // Mock user data - in a real application this would come from an API
 const mockUsers = [
-  { id: "1", name: "Alex Müller", email: "alex@example.com", avatar: "/placeholder.svg", elo: 1850 },
-  { id: "2", name: "Sarah Wagner", email: "sarah@example.com", avatar: "/placeholder.svg", elo: 1820 },
-  { id: "3", name: "Tom Schmidt", email: "tom@example.com", avatar: "/placeholder.svg", elo: 1795 },
-  { id: "4", name: "Maria Fischer", email: "maria@example.com", avatar: "/placeholder.svg", elo: 1780 },
-  { id: "5", name: "Felix Bauer", email: "felix@example.com", avatar: "/placeholder.svg", elo: 1760 },
+  { id: "1", name: "Alex Müller", email: "alex@example.com", elo: 1850 },
+  { id: "2", name: "Sarah Wagner", email: "sarah@example.com", elo: 1820 },
+  { id: "3", name: "Tom Schmidt", email: "tom@example.com", elo: 1795 },
+  { id: "4", name: "Maria Fischer", email: "maria@example.com", elo: 1780 },
+  { id: "5", name: "Felix Bauer", email: "felix@example.com", elo: 1760 },
 ];
 
 const CreateMatchForm = () => {
