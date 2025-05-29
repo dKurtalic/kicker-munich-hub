@@ -18,6 +18,8 @@ import SignupPage from "./pages/SignupPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import MatchDetailsPage from "./pages/MatchDetailsPage";
 import TournamentDetailsPage from "./pages/TournamentDetailsPage";
+import CreateTournamentPage from "./pages/CreateTournamentPage";
+import CreateMatchPage from "./pages/CreateMatchPage";
 
 const queryClient = new QueryClient();
 
@@ -36,11 +38,13 @@ const App = () => (
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/tables" element={<TablesPage />} />
                 <Route path="/tournaments" element={<TournamentsPage />} />
+                <Route path="/tournaments/create" element={<CreateTournamentPage />} />
                 <Route path="/tournaments/:id" element={<TournamentDetailsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/subscription" element={<SubscriptionPage />} />
+                <Route path="/matches/create" element={<CreateMatchPage />} />
                 <Route path="/matches/:id" element={<MatchDetailsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
