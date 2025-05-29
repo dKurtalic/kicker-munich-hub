@@ -40,9 +40,17 @@ interface InviteFriendsFormProps {
   tournamentId?: number;
   tournamentName?: string;
   onClose?: () => void;
+  onBack?: () => void;
+  onSubmit?: (invitees: string[]) => void;
 }
 
-const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFriendsFormProps) => {
+const InviteFriendsForm = ({ 
+  tournamentId, 
+  tournamentName, 
+  onClose,
+  onBack,
+  onSubmit: submitInvites
+}: InviteFriendsFormProps) => {
   const { toast } = useToast();
   const [invitedFriends, setInvitedFriends] = useState<typeof mockFriends>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +64,7 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const handleAddEmail = async (values: FormValues) => {
     // Check if email is already in invited list
     if (invitedFriends.some(friend => friend.email === values.email)) {
       toast({
@@ -125,12 +133,21 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
       // In a real app, this would be an API call to send invites
       console.log("Sending invites to:", invitedFriends);
       
+      // Get emails for onSubmit callback
+      const emails = invitedFriends.map(friend => friend.email);
+      
       // Mock successful invitation
       setTimeout(() => {
         toast({
           title: "Invites sent!",
           description: `Invitations sent to ${invitedFriends.length} people.`,
         });
+        
+        // Call the onSubmit callback if provided
+        if (submitInvites) {
+          submitInvites(emails);
+        }
+        
         setInvitedFriends([]);
         setIsSubmitting(false);
         if (onClose) onClose();
@@ -159,7 +176,7 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
 
       <div className="space-y-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleAddEmail)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -252,6 +269,11 @@ const InviteFriendsForm = ({ tournamentId, tournamentName, onClose }: InviteFrie
       </div>
 
       <div className="flex justify-end space-x-2 pt-4 border-t border-border">
+        {onBack && (
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+        )}
         {onClose && (
           <Button variant="outline" onClick={onClose}>
             Cancel
