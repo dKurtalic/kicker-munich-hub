@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { mockTables } from "./TablesList";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -78,7 +78,7 @@ const AddTableForm = ({ onComplete }: AddTableFormProps) => {
       setTimeout(() => {
         toast({
           title: "Table added!",
-          description: `${values.name} has been added to the tables list. It will need 5 verifications before appearing on the map.`,
+          description: `${values.name} has been added to the tables list.`,
         });
         onComplete();
         setIsSubmitting(false);
@@ -95,187 +95,178 @@ const AddTableForm = ({ onComplete }: AddTableFormProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Alert>
-        <AlertDescription>
-          <strong>Important:</strong> New tables require verification from at least 5 different users before they appear on the map. 
-          This helps ensure that only real, existing tables are added to our database.
-        </AlertDescription>
-      </Alert>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Table Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Spielbar" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Full address including street, city, and postal code"
-                        className="resize-none"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      <div className="flex items-center mt-1 text-xs">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>This will be used to place the table on the map after verification</span>
-                      </div>
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="condition"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Table Condition</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select condition" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="Average">Average</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Very Good">Very Good</SelectItem>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="isPaid"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Paid Table
-                      </FormLabel>
-                      <FormDescription>
-                        Do players need to pay to use this table?
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {isPaid && (
-                <FormField
-                  control={form.control}
-                  name="fee"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fee Details</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. €1 per game, €5 per hour" 
-                          {...field} 
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Table Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Spielbar" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
+            />
 
-              <FormField
-                control={form.control}
-                name="hasBalls"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Balls Provided
-                      </FormLabel>
-                      <FormDescription>
-                        Are balls provided or do players need to bring their own?
-                      </FormDescription>
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Full address including street, city, and postal code"
+                      className="resize-none"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    <div className="flex items-center mt-1 text-xs">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span>This will be used to place the table on the map</span>
                     </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
+            <FormField
+              control={form.control}
+              name="condition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Table Condition</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select condition" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Poor">Poor</SelectItem>
+                      <SelectItem value="Average">Average</SelectItem>
+                      <SelectItem value="Good">Good</SelectItem>
+                      <SelectItem value="Very Good">Very Good</SelectItem>
+                      <SelectItem value="Excellent">Excellent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="isPaid"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Paid Table
+                    </FormLabel>
+                    <FormDescription>
+                      Do players need to pay to use this table?
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {isPaid && (
               <FormField
                 control={form.control}
-                name="notes"
+                name="fee"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Notes (Optional)</FormLabel>
+                    <FormLabel>Fee Details</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Any additional information about the table..."
-                        className="resize-none"
+                      <Input 
+                        placeholder="e.g. €1 per game, €5 per hour" 
                         {...field} 
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-          </div>
+            )}
 
-          <div className="flex justify-end space-x-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onComplete}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Add Table"}
-            </Button>
+            <FormField
+              control={form.control}
+              name="hasBalls"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Balls Provided
+                    </FormLabel>
+                    <FormDescription>
+                      Are balls provided or do players need to bring their own?
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Notes (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Any additional information about the table..."
+                      className="resize-none"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-        </form>
-      </Form>
-    </div>
+        </div>
+
+        <div className="flex justify-end space-x-4 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onComplete}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Add Table"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
