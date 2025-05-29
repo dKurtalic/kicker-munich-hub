@@ -60,12 +60,12 @@ const MatchDetailsPage = () => {
   const isParticipant = isAuthenticated && match.team1.players.concat(match.team2.players)
     .some(player => player.name === user?.name);
   
-  // Changed: Allow any authenticated user to record results, not just participants
+  // Changed: Allow any authenticated user to record results
   const canRecordResult = isAuthenticated && 
     match.status === "completed" && 
     !match.resultStatus;
   
-  // Changed: Allow any authenticated user to confirm results, not just participants
+  // Changed: Allow any authenticated user to confirm results, but not if they submitted it
   const canConfirmResult = isAuthenticated && 
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
