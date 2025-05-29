@@ -1,8 +1,3 @@
+import { useToast, toast } from "@/hooks/use-toast";
 
-// Re-export from the actual implementation
-// Import this file in components, not directly from use-toast.ts
-import { ToastActionElement } from "@/components/ui/toast";
-import { useToast as useToastHook, toast as toastFunction } from "@/hooks/use-toast";
-
-export { useToastHook as useToast, toastFunction as toast };
-export type { ToastActionElement };
+export { useToast, toast };

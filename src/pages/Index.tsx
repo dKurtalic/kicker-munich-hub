@@ -39,11 +39,11 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 to-background pt-20 pb-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-            Kickstart Your Game at KickerTUM
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Munich's Premier Kicker Community
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Munich's Premier Kicker Community - Track matches, participate in tournaments, and discover kicker tables around Munich.
+            Track matches, participate in tournaments, and discover kicker tables around Munich.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
@@ -99,8 +99,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Recent Activity Section with enhanced styling */}
-      <section className="py-16 bg-gradient-to-br from-muted/30 to-background">
+      {/* Recent Activity Section */}
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold">Recent Activity</h2>
@@ -111,7 +111,7 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Recent Matches */}
-            <div className="ios-card p-6 border-2 border-primary/10">
+            <div className="ios-card p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold text-lg">Recent Matches</h3>
                 <Button asChild size="sm" variant="ghost" className="rounded-full">
@@ -122,7 +122,7 @@ const Index = () => {
               {/* Sample matches - In a real app these would be dynamically loaded */}
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border/40 hover:border-primary/30 transition-colors">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border/40">
                     <div className="flex items-center gap-3">
                       <User className="h-5 w-5 text-muted-foreground" />
                       <div>
@@ -143,7 +143,7 @@ const Index = () => {
             </div>
             
             {/* Upcoming Tournaments */}
-            <div className="ios-card p-6 border-2 border-primary/10">
+            <div className="ios-card p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold text-lg">Upcoming Tournaments</h3>
                 <Button asChild size="sm" variant="ghost" className="rounded-full">
@@ -154,7 +154,7 @@ const Index = () => {
               {/* Sample tournaments */}
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border/40 hover:border-primary/30 transition-colors">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border/40">
                     <div className="flex items-center gap-3">
                       <Trophy className="h-5 w-5 text-muted-foreground" />
                       <div>
@@ -177,10 +177,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Premium Features CTA with enhanced styling */}
+      {/* Premium Features CTA */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="ios-card p-8 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5 overflow-hidden relative rounded-2xl">
+          <div className="ios-card p-8 bg-gradient-to-r from-primary/10 to-primary/5 overflow-hidden relative">
             <div className="max-w-2xl relative z-10">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
                 Unlock Premium Features
@@ -195,9 +195,8 @@ const Index = () => {
               </Button>
             </div>
             
-            {/* Decorative Elements */}
+            {/* Decorative Element */}
             <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-primary/20 to-transparent"></div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/10 rounded-full filter blur-2xl"></div>
           </div>
         </div>
       </section>

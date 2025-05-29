@@ -1,17 +1,11 @@
+
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Trophy, Users, Clock, ArrowLeft, Edit } from 'lucide-react';
+import { Calendar, MapPin, Trophy, Users, Clock, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import RecordResultForm from '@/components/match/RecordResultForm';
 
 // Mock tournament data
 const mockTournament = {
@@ -52,23 +46,23 @@ const mockBrackets = [
   {
     round: "Quarter-Finals",
     matches: [
-      { id: 1, team1: "Max & Julia", team2: "Thomas & Anna", score: "5-3", status: "confirmed" },
-      { id: 2, team1: "Michael & Sophie", team2: "David & Laura", score: "5-4", status: "confirmed" },
-      { id: 3, team1: "Christian & Elena", team2: "Markus & Nina", score: "5-2", status: "confirmed" },
-      { id: 4, team1: "Felix & Lisa", team2: "Jonas & Sarah", score: "5-1", status: "confirmed" }
+      { id: 1, team1: "Max & Julia", team2: "Thomas & Anna", score: "5-3" },
+      { id: 2, team1: "Michael & Sophie", team2: "David & Laura", score: "5-4" },
+      { id: 3, team1: "Christian & Elena", team2: "Markus & Nina", score: "5-2" },
+      { id: 4, team1: "Felix & Lisa", team2: "Jonas & Sarah", score: "5-1" }
     ]
   },
   {
     round: "Semi-Finals",
     matches: [
-      { id: 5, team1: "Max & Julia", team2: "Michael & Sophie", score: "-", status: null },
-      { id: 6, team1: "Christian & Elena", team2: "Felix & Lisa", score: "-", status: null }
+      { id: 5, team1: "Max & Julia", team2: "Michael & Sophie", score: "-" },
+      { id: 6, team1: "Christian & Elena", team2: "Felix & Lisa", score: "-" }
     ]
   },
   {
     round: "Final",
     matches: [
-      { id: 7, team1: "TBD", team2: "TBD", score: "-", status: null }
+      { id: 7, team1: "TBD", team2: "TBD", score: "-" }
     ]
   }
 ];
@@ -77,33 +71,12 @@ const TournamentDetailsPage = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
   const [isJoined, setIsJoined] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
-  const [brackets, setBrackets] = useState(mockBrackets);
   
   // In a real app, you would fetch the tournament data based on the ID
   // Here we're using the mock data for demonstration
   
   const handleJoinTournament = () => {
     setIsJoined(true);
-  };
-  
-  const handleRecordResult = (matchId: number) => {
-    setSelectedMatch(matchId);
-  };
-  
-  const handleResultRecorded = () => {
-    // In a real app, this would update the match with the new result
-    setBrackets(prevBrackets => 
-      prevBrackets.map(round => ({
-        ...round,
-        matches: round.matches.map(match => 
-          match.id === selectedMatch 
-            ? { ...match, score: "5-3", status: "pending_confirmation" } 
-            : match
-        )
-      }))
-    );
-    setSelectedMatch(null);
   };
   
   return (
@@ -315,7 +288,7 @@ const TournamentDetailsPage = () => {
               <CardContent>
                 <div className="overflow-x-auto">
                   <div className="min-w-[800px] flex justify-between space-x-6">
-                    {brackets.map((round, roundIndex) => (
+                    {mockBrackets.map((round, roundIndex) => (
                       <div key={roundIndex} className="flex-1">
                         <h3 className="text-center font-semibold mb-4 px-2 py-1 bg-muted/50 rounded-lg">
                           {round.round}
@@ -351,27 +324,6 @@ const TournamentDetailsPage = () => {
                                 </div>
                               </div>
                               
-                              {isAuthenticated && match.score === '-' && (
-                                <div className="absolute -top-3 -right-3">
-                                  <Button 
-                                    size="icon" 
-                                    variant="outline" 
-                                    className="h-8 w-8 rounded-full bg-background"
-                                    onClick={() => handleRecordResult(match.id)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              )}
-                              
-                              {match.status === 'pending_confirmation' && (
-                                <div className="absolute top-2 right-2">
-                                  <span className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full">
-                                    Pending
-                                  </span>
-                                </div>
-                              )}
-                              
                               {/* Match connector lines would go here in a real implementation */}
                             </div>
                           ))}
@@ -397,7 +349,7 @@ const TournamentDetailsPage = () => {
               <CardContent>
                 <div className="space-y-6">
                   {/* Group matches by round */}
-                  {brackets.map((round, roundIndex) => (
+                  {mockBrackets.map((round, roundIndex) => (
                     <div key={roundIndex}>
                       <h3 className="font-semibold mb-3">{round.round}</h3>
                       <div className="space-y-3">
@@ -427,34 +379,15 @@ const TournamentDetailsPage = () => {
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-2">
-                              {match.score !== '-' ? (
-                                <div className="text-lg font-bold">
-                                  {match.score}
-                                  {match.status === 'pending_confirmation' && (
-                                    <span className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full ml-2">
-                                      Pending
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="text-sm text-muted-foreground">
-                                    Not played yet
-                                  </div>
-                                  {isAuthenticated && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      onClick={() => handleRecordResult(match.id)}
-                                    >
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Record
-                                    </Button>
-                                  )}
-                                </>
-                              )}
-                            </div>
+                            {match.score !== '-' ? (
+                              <div className="text-lg font-bold">
+                                {match.score}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-muted-foreground">
+                                Not played yet
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -466,18 +399,6 @@ const TournamentDetailsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-      
-      <Dialog open={selectedMatch !== null} onOpenChange={(open) => !open && setSelectedMatch(null)}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Record Match Result</DialogTitle>
-          </DialogHeader>
-          <RecordResultForm 
-            matchId={selectedMatch || undefined} 
-            onCompleted={handleResultRecorded} 
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
