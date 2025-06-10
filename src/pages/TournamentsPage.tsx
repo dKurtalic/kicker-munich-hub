@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Trophy, Users, Clock, Search, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import {DeleteTournamentDialog} from '@/components/tournament/DeleteTorunamentDialog'
+
 
 // Mock tournament data
 const mockTournaments = [
@@ -80,8 +83,11 @@ const TournamentsPage = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
+
+  const [tournaments, setTournaments] = useState(mockTournaments);
+  const navigate = useNavigate();
   
-  const filteredTournaments = mockTournaments.filter(tournament => {
+  const filteredTournaments = tournaments.filter(tournament => {
     const matchesSearch = tournament.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tournament.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = tournament.status === activeTab;
@@ -118,10 +124,7 @@ const TournamentsPage = () => {
     }
     
     // Here you would open the tournament creation form or redirect to a creation page
-    toast({
-      title: "Coming soon",
-      description: "Tournament creation will be available soon!",
-    });
+    navigate("/tournaments/create");
   };
   
   const handleJoinTournament = (tournamentId: number) => {
@@ -138,6 +141,9 @@ const TournamentsPage = () => {
       title: "Tournament joined!",
       description: "You have successfully joined the tournament.",
     });
+  };
+  const handleDeleteTournament = (tournamentId: number) => {
+    setTournaments(tournaments.filter(t => t.id !== tournamentId));
   };
 
   return (
@@ -188,11 +194,11 @@ const TournamentsPage = () => {
                 <h3 className="text-sm font-semibold mb-3">Quick Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted/50 p-4 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{mockTournaments.filter(t => t.status === 'upcoming').length}</p>
+                    <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'upcoming').length}</p>
                     <p className="text-xs text-muted-foreground">Upcoming</p>
                   </div>
                   <div className="bg-muted/50 p-4 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{mockTournaments.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'completed').length}</p>
                     <p className="text-xs text-muted-foreground">Completed</p>
                   </div>
                 </div>
@@ -244,6 +250,13 @@ const TournamentsPage = () => {
                               </div>
                             </div>
                           </div>
+                          {user?.isPremium && (
+                            <DeleteTournamentDialog 
+                              tournamentId={tournament.id}
+                              tournamentName={tournament.name}
+                              onDelete={handleDeleteTournament}
+                            />
+                          )}
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 mt-6">

@@ -20,6 +20,7 @@ import MatchDetailsPage from "./pages/MatchDetailsPage";
 import TournamentDetailsPage from "./pages/TournamentDetailsPage";
 import CreateTournamentPage from "./pages/CreateTournamentPage";
 import CreateMatchPage from "./pages/CreateMatchPage";
+import MatchesPage from '@/pages/MatchesPage'
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,9 @@ const App = () => (
               <Route path="/tables" element={<TablesPage />} />
               <Route path="/tournaments" element={<TournamentsPage />} />
               <Route path="/tournaments/create" element={<CreateTournamentPage />} />
+              <Route path="/matches" element={<MatchesPage/>}/>
+              <Route path="/matches/create" element={<CreateMatchPage />} />
+              <Route path="/matches/:id" element={<MatchDetailsPage />} />
               <Route path="/tournaments/:id" element={<TournamentDetailsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/login" element={<LoginPage />} />
