@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -60,13 +59,11 @@ const MatchDetailsPage = () => {
   const isParticipant = isAuthenticated && match.team1.players.concat(match.team2.players)
     .some(player => player.name === user?.name);
   
-  // Changed: Allow any authenticated user to record results
-  const canRecordResult = isAuthenticated && 
+  const canRecordResult = isParticipant && 
     match.status === "completed" && 
     !match.resultStatus;
   
-  // Changed: Allow any authenticated user to confirm results, but not if they submitted it
-  const canConfirmResult = isAuthenticated && 
+  const canConfirmResult = isParticipant && 
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
     match.submittedBy !== user?.name;
@@ -107,7 +104,7 @@ const MatchDetailsPage = () => {
                   match.status === "scheduled" ? "default" : 
                   match.status === "active" ? "default" : 
                   match.status === "completed" ? 
-                    match.resultStatus === "confirmed" ? "secondary" : "outline" : 
+                    match.resultStatus === "confirmed" ? "success" : "warning" : 
                   "destructive"
                 }
                 className="rounded-full px-3"
@@ -224,9 +221,9 @@ const MatchDetailsPage = () => {
                           
                           <div className="mt-2 text-sm text-muted-foreground">
                             <Badge variant={
-                              match.resultStatus === "confirmed" ? "secondary" :
+                              match.resultStatus === "confirmed" ? "success" :
                               match.resultStatus === "disputed" ? "destructive" :
-                              "outline"
+                              "warning"
                             }>
                               {match.resultStatus === "confirmed" 
                                 ? "Confirmed" 
