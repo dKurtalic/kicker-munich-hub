@@ -112,12 +112,18 @@ const TablesList = () => {
             </div>
             
             <div className="col-span-2">
-              <Badge variant={
-                table.condition === "Excellent" ? "success" : 
-                table.condition === "Very Good" ? "success" : 
-                table.condition === "Good" ? "default" : 
-                "outline"
-              }>
+              <Badge 
+                variant={
+                  table.condition === "Excellent" || table.condition === "Very Good" ? "default" : 
+                  table.condition === "Good" ? "secondary" : 
+                  "outline"
+                }
+                className={
+                  table.condition === "Excellent" || table.condition === "Very Good" 
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
+                    : ""
+                }
+              >
                 {table.condition}
               </Badge>
             </div>
