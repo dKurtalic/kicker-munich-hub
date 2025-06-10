@@ -1,6 +1,8 @@
+
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { 
   Card, 
   CardContent, 
@@ -9,10 +11,11 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, MapPin, Trophy, Users, Clock, Check } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Trophy, Users, Clock, Check, Edit, Save } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import RecordResultForm from '@/components/match/RecordResultForm';
 import ConfirmResultForm from '@/components/match/ConfirmResultForm';
 
@@ -50,8 +53,14 @@ const mockMatch = {
 const MatchDetailsPage = () => {
   const { id } = useParams();
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [match, setMatch] = useState(mockMatch);
   const [activeTab, setActiveTab] = useState("details");
+  const [isEditingScore, setIsEditingScore] = useState(false);
+  const [editableScores, setEditableScores] = useState({
+    team1Score: match.team1.score.toString(),
+    team2Score: match.team2.score.toString()
+  });
   
   // In a real app, you would fetch the match data based on the ID
   
@@ -67,6 +76,8 @@ const MatchDetailsPage = () => {
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
     match.submittedBy !== user?.name;
+
+  const canEditScore = isParticipant && match.resultStatus === "pending_confirmation";
   
   const handleResultRecorded = () => {
     setMatch({
@@ -82,6 +93,54 @@ const MatchDetailsPage = () => {
       resultStatus: "confirmed"
     });
     setActiveTab("details");
+  };
+
+  const handleScoreEdit = () => {
+    setIsEditingScore(true);
+  };
+
+  const handleScoreSave = () => {
+    const team1Score = parseInt(editableScores.team1Score);
+    const team2Score = parseInt(editableScores.team2Score);
+
+    if (isNaN(team1Score) || isNaN(team2Score) || team1Score < 0 || team2Score < 0) {
+      toast({
+        title: "Invalid Score",
+        description: "Please enter valid positive numbers for both scores.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (team1Score === team2Score) {
+      toast({
+        title: "Invalid Score", 
+        description: "Matches cannot end in a tie.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setMatch({
+      ...match,
+      team1: { ...match.team1, score: team1Score },
+      team2: { ...match.team2, score: team2Score }
+    });
+    
+    setIsEditingScore(false);
+    
+    toast({
+      title: "Score Updated",
+      description: "The match score has been updated successfully.",
+    });
+  };
+
+  const handleScoreCancel = () => {
+    setEditableScores({
+      team1Score: match.team1.score.toString(),
+      team2Score: match.team2.score.toString()
+    });
+    setIsEditingScore(false);
   };
   
   return (
@@ -197,7 +256,20 @@ const MatchDetailsPage = () => {
                   
                   {match.resultStatus && (
                     <div className="mt-6 pt-6 border-t border-border">
-                      <h3 className="font-semibold mb-4">Match Result</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold">Match Result</h3>
+                        {canEditScore && !isEditingScore && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleScoreEdit}
+                            className="rounded-full"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Score
+                          </Button>
+                        )}
+                      </div>
                       
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-3 p-4 rounded-lg bg-muted/50">
@@ -219,32 +291,80 @@ const MatchDetailsPage = () => {
                         </div>
                         
                         <div className="flex flex-col items-center justify-center">
-                          <div className="text-3xl font-bold">
-                            {match.team1.score} : {match.team2.score}
-                          </div>
-                          
-                          <div className="mt-2 text-sm text-muted-foreground">
-                            <Badge variant={
-                              match.resultStatus === "confirmed" ? "default" :
-                              match.resultStatus === "disputed" ? "destructive" :
-                              "secondary"
-                            } className={
-                              match.resultStatus === "confirmed" 
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-                                : ""
-                            }>
-                              {match.resultStatus === "confirmed" 
-                                ? "Confirmed" 
-                                : match.resultStatus === "disputed"
-                                ? "Disputed"
-                                : "Pending Confirmation"}
-                            </Badge>
-                          </div>
-                          
-                          {match.submittedBy && (
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Reported by {match.submittedBy}
+                          {isEditingScore ? (
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-3 items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={editableScores.team1Score}
+                                  onChange={(e) => setEditableScores({
+                                    ...editableScores,
+                                    team1Score: e.target.value
+                                  })}
+                                  className="text-center text-lg"
+                                />
+                                <div className="text-center text-lg">:</div>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={editableScores.team2Score}
+                                  onChange={(e) => setEditableScores({
+                                    ...editableScores,
+                                    team2Score: e.target.value
+                                  })}
+                                  className="text-center text-lg"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleScoreCancel}
+                                  className="rounded-full"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={handleScoreSave}
+                                  className="rounded-full"
+                                >
+                                  <Save className="h-4 w-4 mr-1" />
+                                  Save
+                                </Button>
+                              </div>
                             </div>
+                          ) : (
+                            <>
+                              <div className="text-3xl font-bold">
+                                {match.team1.score} : {match.team2.score}
+                              </div>
+                              
+                              <div className="mt-2 text-sm text-muted-foreground">
+                                <Badge variant={
+                                  match.resultStatus === "confirmed" ? "default" :
+                                  match.resultStatus === "disputed" ? "destructive" :
+                                  "secondary"
+                                } className={
+                                  match.resultStatus === "confirmed" 
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
+                                    : ""
+                                }>
+                                  {match.resultStatus === "confirmed" 
+                                    ? "Confirmed" 
+                                    : match.resultStatus === "disputed"
+                                    ? "Disputed"
+                                    : "Pending Confirmation"}
+                                </Badge>
+                              </div>
+                              
+                              {match.submittedBy && (
+                                <div className="mt-2 text-xs text-muted-foreground">
+                                  Reported by {match.submittedBy}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                         
