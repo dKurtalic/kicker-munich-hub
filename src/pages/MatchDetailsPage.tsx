@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -226,9 +225,13 @@ const MatchDetailsPage = () => {
                           
                           <div className="mt-2 text-sm text-muted-foreground">
                             <Badge variant={
-                              match.resultStatus === "confirmed" ? "success" :
+                              match.resultStatus === "confirmed" ? "default" :
                               match.resultStatus === "disputed" ? "destructive" :
-                              "warning"
+                              "secondary"
+                            } className={
+                              match.resultStatus === "confirmed" 
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
+                                : ""
                             }>
                               {match.resultStatus === "confirmed" 
                                 ? "Confirmed" 
