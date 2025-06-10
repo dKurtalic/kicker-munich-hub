@@ -73,8 +73,7 @@ const MatchDetailsPage = () => {
     match.status === "completed" && 
     !match.resultStatus;
   
-  // Changed: Allow any authenticated user to confirm results, but not if they submitted it
-  const canConfirmResult = isAuthenticated && 
+  const canConfirmResult = isParticipant && 
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
     match.submittedBy !== user?.name;

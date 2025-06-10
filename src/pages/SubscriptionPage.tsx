@@ -167,7 +167,7 @@ const SubscriptionPage = () => {
               variant="default"
             >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {isProcessing ? 'Processing...' : 'Subscribe with Stripe'}
+                {isProcessing ? 'Processing...' : 'Subscribe Now'}
               </Button>
             )}
           </CardFooter>

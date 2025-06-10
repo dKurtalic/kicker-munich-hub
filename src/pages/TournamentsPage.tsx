@@ -14,7 +14,7 @@ import {DeleteTournamentDialog} from '@/components/tournament/DeleteTorunamentDi
 
 
 // Mock tournament data
-const mockTournaments = [
+const initialTournaments = [
   {
     id: 1,
     name: "Munich Spring Championship",
@@ -103,6 +103,10 @@ const TournamentsPage = () => {
     }
     return 0;
   });
+
+  const handleDeleteTournament = (tournamentId: number) => {
+    setTournaments(tournaments.filter(t => t.id !== tournamentId));
+  };
   
   const handleCreateTournament = () => {
     if (!isAuthenticated) {
@@ -195,9 +199,11 @@ const TournamentsPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted/50 p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'upcoming').length}</p>
+                    <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'upcoming').length}</p>
                     <p className="text-xs text-muted-foreground">Upcoming</p>
                   </div>
                   <div className="bg-muted/50 p-4 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'completed').length}</p>
                     <p className="text-2xl font-bold">{tournaments.filter(t => t.status === 'completed').length}</p>
                     <p className="text-xs text-muted-foreground">Completed</p>
                   </div>
@@ -250,6 +256,13 @@ const TournamentsPage = () => {
                               </div>
                             </div>
                           </div>
+                          {user?.isPremium && (
+                            <DeleteTournamentDialog 
+                              tournamentId={tournament.id}
+                              tournamentName={tournament.name}
+                              onDelete={handleDeleteTournament}
+                            />
+                          )}
                           {user?.isPremium && (
                             <DeleteTournamentDialog 
                               tournamentId={tournament.id}
