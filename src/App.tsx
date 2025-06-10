@@ -16,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
+import MatchesPage from "./pages/MatchesPage";
 import MatchDetailsPage from "./pages/MatchDetailsPage";
 import TournamentDetailsPage from "./pages/TournamentDetailsPage";
 import CreateTournamentPage from "./pages/CreateTournamentPage";
@@ -40,12 +41,13 @@ const App = () => (
                 <Route path="/tournaments" element={<TournamentsPage />} />
                 <Route path="/tournaments/create" element={<CreateTournamentPage />} />
                 <Route path="/tournaments/:id" element={<TournamentDetailsPage />} />
+                <Route path="/matches" element={<MatchesPage />} />
+                <Route path="/matches/create" element={<CreateMatchPage />} />
+                <Route path="/matches/:id" element={<MatchDetailsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/subscription" element={<SubscriptionPage />} />
-                <Route path="/matches/create" element={<CreateMatchPage />} />
-                <Route path="/matches/:id" element={<MatchDetailsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
