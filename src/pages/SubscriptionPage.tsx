@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, AlertCircle, CreditCard } from 'lucide-react';
+import { Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,8 +32,6 @@ const SubscriptionPage = () => {
   const handleSubscribe = async () => {
     setIsProcessing(true);
     try {
-      // If we had a real Stripe integration, we would redirect to Stripe checkout here
-      // For demo purposes, we're just calling the mock subscribeUser function
       await subscribeUser();
       toast({
         title: "Success!",
@@ -109,13 +107,12 @@ const SubscriptionPage = () => {
         </Card>
         
         {/* Premium Plan */}
-        <Card className={`ios-card relative ${user?.isPremium ? 'border-2 border-primary' : ''} overflow-hidden`}>
+        <Card className={`ios-card relative ${user?.isPremium ? 'border-2 border-primary' : ''}`}>
           {user?.isPremium && (
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
               Your Plan
             </div>
           )}
-          <div className="absolute -right-12 -top-12 bg-primary/10 rounded-full w-40 h-40"></div>
           <CardHeader>
             <CardTitle className="text-2xl">Premium</CardTitle>
             <CardDescription>Full access to all features</CardDescription>
@@ -160,10 +157,8 @@ const SubscriptionPage = () => {
                 onClick={handleSubscribe}
                 disabled={isProcessing}
                 className="w-full rounded-full"
-                variant="default"
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                {isProcessing ? 'Processing...' : 'Subscribe with Stripe'}
+                {isProcessing ? 'Processing...' : 'Subscribe Now'}
               </Button>
             )}
           </CardFooter>
