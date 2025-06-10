@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, AlertCircle, CreditCard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import PaymentModal from '@/components/subscription/PaymentModal';
 
 const SubscriptionPage = () => {
   const { isAuthenticated, isLoading, user, subscribeUser } = useAuth();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   
   // If not authenticated and not loading, redirect to login
   if (!isLoading && !isAuthenticated) {
@@ -30,6 +32,10 @@ const SubscriptionPage = () => {
   }
   
   const handleSubscribe = async () => {
+    setIsPaymentModalOpen(true);
+  };
+  
+  const processSubscription = async () => {
     setIsProcessing(true);
     try {
       // If we had a real Stripe integration, we would redirect to Stripe checkout here
@@ -163,7 +169,7 @@ const SubscriptionPage = () => {
                 variant="default"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {isProcessing ? 'Processing...' : 'Subscribe with Stripe'}
+                {isProcessing ? 'Processing...' : 'Subscribe Now'}
               </Button>
             )}
           </CardFooter>
@@ -187,6 +193,13 @@ const SubscriptionPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Payment Modal */}
+      <PaymentModal 
+        open={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+        onSubscribe={processSubscription}
+      />
     </div>
   );
 };
