@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Check, X, MapPin, Euro, Table as TableIcon, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -113,16 +112,10 @@ const TablesList = () => {
             
             <div className="col-span-2">
               <Badge 
-                variant={
-                  table.condition === "Excellent" || table.condition === "Very Good" ? "default" : 
-                  table.condition === "Good" ? "secondary" : 
-                  "outline"
-                }
-                className={
-                  table.condition === "Excellent" || table.condition === "Very Good" 
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-                    : ""
-                }
+                variant={table.condition === "Good" ? "default" : 
+                        table.condition === "Excellent" ? "secondary" : 
+                        "outline"}
+                className="text-xs rounded-full px-2"
               >
                 {table.condition}
               </Badge>

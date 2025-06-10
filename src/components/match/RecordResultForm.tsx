@@ -52,7 +52,7 @@ const mockMatch = {
   isDoubles: true,
   team1: {
     players: [
-      { id: "current-user", name: "You", avatar: "/placeholder.svg", elo: 1500 },
+      { id: "1", name: "Max Schmidt", avatar: "/placeholder.svg", elo: 1850 },
       { id: "2", name: "Sarah Wagner", avatar: "/placeholder.svg", elo: 1820 },
     ]
   },
@@ -94,7 +94,7 @@ const RecordResultForm = ({ matchId = 1, onCompleted }: RecordResultFormProps) =
       setTimeout(() => {
         toast({
           title: "Result submitted!",
-          description: "The opponent will be notified to confirm the result.",
+          description: "The participants will be notified to confirm the result.",
         });
         if (onCompleted) {
           onCompleted();
@@ -252,7 +252,7 @@ const RecordResultForm = ({ matchId = 1, onCompleted }: RecordResultFormProps) =
             <div>
               <h4 className="text-sm font-medium">Confirmation Required</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                After submitting, your opponent will be notified to confirm the result. 
+                After submitting, the participants will be notified to confirm the result. 
                 ELO ratings will be updated after confirmation.
               </p>
             </div>

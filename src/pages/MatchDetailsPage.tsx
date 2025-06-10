@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -59,11 +60,13 @@ const MatchDetailsPage = () => {
   const isParticipant = isAuthenticated && match.team1.players.concat(match.team2.players)
     .some(player => player.name === user?.name);
   
+  // Changed: Allow any authenticated user to record results
   const canRecordResult = isAuthenticated && 
     match.status === "completed" && 
     !match.resultStatus;
   
-  const canConfirmResult = isParticipant && 
+  // Changed: Allow any authenticated user to confirm results, but not if they submitted it
+  const canConfirmResult = isAuthenticated && 
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
     match.submittedBy !== user?.name;
@@ -86,7 +89,7 @@ const MatchDetailsPage = () => {
   
   return (
     <div className="container mx-auto px-4 py-12 animate-fade-in">
-      <Link to="/matches" className="flex items-center text-muted-foreground hover:text-foreground mb-6">
+      <Link to="/profile" className="flex items-center text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
         <span>Back to Matches</span>
       </Link>
@@ -104,14 +107,10 @@ const MatchDetailsPage = () => {
                   match.status === "scheduled" ? "default" : 
                   match.status === "active" ? "default" : 
                   match.status === "completed" ? 
-                    match.resultStatus === "confirmed" ? "default" : "secondary" : 
+                    match.resultStatus === "confirmed" ? "secondary" : "outline" : 
                   "destructive"
                 }
-                className={`rounded-full px-3 ${
-                  match.status === "completed" && match.resultStatus === "confirmed" 
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-                    : ""
-                }`}
+                className="rounded-full px-3"
               >
                 {match.status === "completed" && match.resultStatus === "confirmed" 
                   ? "Completed" 
@@ -225,13 +224,9 @@ const MatchDetailsPage = () => {
                           
                           <div className="mt-2 text-sm text-muted-foreground">
                             <Badge variant={
-                              match.resultStatus === "confirmed" ? "default" :
+                              match.resultStatus === "confirmed" ? "secondary" :
                               match.resultStatus === "disputed" ? "destructive" :
-                              "secondary"
-                            } className={
-                              match.resultStatus === "confirmed" 
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" 
-                                : ""
+                              "outline"
                             }>
                               {match.resultStatus === "confirmed" 
                                 ? "Confirmed" 

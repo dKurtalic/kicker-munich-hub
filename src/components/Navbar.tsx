@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Home, Trophy, Map, User, Menu, X, Gamepad2 } from "lucide-react";
+import { Home, Trophy, Map, User, Menu, X } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -20,7 +20,6 @@ const Navbar = () => {
 
   const navItems = [
     { icon: <Home className="h-5 w-5" />, label: 'Home', path: '/' },
-    { icon: <Gamepad2 className="h-5 w-5" />, label: 'Matches', path: '/matches' },
     { icon: <Trophy className="h-5 w-5" />, label: 'Tournaments', path: '/tournaments' },
     { icon: <Map className="h-5 w-5" />, label: 'Tables', path: '/tables' },
     { icon: <User className="h-5 w-5" />, label: 'Profile', path: '/profile' },
