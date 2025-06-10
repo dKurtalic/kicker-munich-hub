@@ -53,12 +53,9 @@ const demoUsers = [
 const CreateMatchForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
   const [invitedUsers, setInvitedUsers] = useState<typeof demoUsers>([]);
-  const [teamMode, setTeamMode] = useState<"1v1" | "2v2">("1v1");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [matchData, setMatchData] = useState<Partial<FormValues> | null>(null);
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -73,6 +70,9 @@ const CreateMatchForm = () => {
     },
   });
 
+  const gameType = form.watch("gameType");
+  const maxInvites = gameType === "1v1" ? 1 : 3;
+
   const filteredUsers = demoUsers.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -84,13 +84,12 @@ const CreateMatchForm = () => {
       setInvitedUsers(invitedUsers.filter(u => u.id !== user.id));
     } else {
       // Add user to invited list
-      if ((teamMode === "1v1" && invitedUsers.length < 1) || 
-          (teamMode === "2v2" && invitedUsers.length < 3)) {
+      if (invitedUsers.length < maxInvites) {
         setInvitedUsers([...invitedUsers, user]);
       } else {
         toast({
           title: "Team is full",
-          description: `You can only invite ${teamMode === "1v1" ? "1" : "3"} player${teamMode === "2v2" ? "s" : ""} for ${teamMode} mode.`,
+          description: `You can only invite ${maxInvites} player${maxInvites > 1 ? "s" : ""} for ${gameType} mode.`,
           variant: "destructive",
         });
       }
@@ -101,20 +100,10 @@ const CreateMatchForm = () => {
     return invitedUsers.some(user => user.id === userId);
   };
 
-  // Handle form submission for the first step
-  const onSubmitFirstStep = (data: FormValues) => {
-    setMatchData(data);
-    setTeamMode(data.gameType);
-    setStep(2);
-  };
-
-  // Handle final submission
-  const onSubmitFinal = async () => {
-    if (!matchData) return;
-    
+  // Handle form submission
+  const onSubmit = async (data: FormValues) => {
     try {
-      // In a real app, this would send data to your backend
-      console.log("Match created with data:", matchData);
+      console.log("Match created with data:", data);
       console.log("Invited users:", invitedUsers);
       
       toast({
@@ -134,18 +123,11 @@ const CreateMatchForm = () => {
     }
   };
 
-  const goBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  // Render the first step form
-  const renderFirstStepForm = () => (
-    <div>
+  return (
+    <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Create New Match</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmitFirstStep)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="title"
@@ -240,7 +222,13 @@ const CreateMatchForm = () => {
               <FormItem>
                 <FormLabel>Game Type</FormLabel>
                 <Select 
-                  onValueChange={field.onChange} 
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Clear invited users if switching game types and exceeding new limit
+                    if (value === "1v1" && invitedUsers.length > 1) {
+                      setInvitedUsers(invitedUsers.slice(0, 1));
+                    }
+                  }} 
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -258,119 +246,75 @@ const CreateMatchForm = () => {
             )}
           />
 
+          {/* Invite Players Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Invite Players ({invitedUsers.length}/{maxInvites})</h3>
+              <Button 
+                type="button"
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsInviteDialogOpen(true)}
+                className="rounded-full"
+              >
+                <PlusCircle className="h-4 w-4 mr-1" /> Find Players
+              </Button>
+            </div>
+            
+            {invitedUsers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {invitedUsers.map(user => (
+                  <Card key={user.id} className="overflow-hidden">
+                    <CardContent className="p-3 flex justify-between items-center">
+                      <div className="flex items-center">
+                        <Avatar className="h-10 w-10 mr-3">
+                          <img src={user.avatar} alt={user.name} />
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <Button 
+                        type="button"
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleInviteUser(user)}
+                      >
+                        <X className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-muted/30 rounded-lg p-6 text-center">
+                <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                <h4 className="text-lg font-medium">No Players Invited Yet</h4>
+                <p className="text-sm text-muted-foreground mb-4">Invite players to join your match</p>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => setIsInviteDialogOpen(true)}
+                  className="rounded-full"
+                >
+                  Find Players
+                </Button>
+              </div>
+            )}
+          </div>
+
           <div className="pt-4 flex justify-end">
             <Button type="submit" className="rounded-full">
-              Continue to Invite Players
+              <Trophy className="mr-2 h-4 w-4" />
+              Create Match
             </Button>
           </div>
         </form>
       </Form>
-    </div>
-  );
 
-  // Render the second step (invite users) form
-  const renderInviteUsersForm = () => (
-    <div>
-      <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={goBack} 
-          className="mr-2"
-        >
-          <X className="h-4 w-4 mr-1" /> Back
-        </Button>
-        <h2 className="text-2xl font-bold">Invite Players</h2>
-      </div>
-      
-      <div className="bg-muted/30 p-4 rounded-lg mb-6">
-        <h3 className="text-lg font-medium mb-2">Match Details</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Title</p>
-            <p>{matchData?.title}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Date & Time</p>
-            <p>{matchData?.date ? format(matchData.date, "PPP") : ""} at {matchData?.time}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Location</p>
-            <p>{matchData?.location}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Game Type</p>
-            <p>{matchData?.gameType === "1v1" ? "1v1 Single Player" : "2v2 Team Match"}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Invited Players ({invitedUsers.length}/{teamMode === "1v1" ? "1" : "3"})</h3>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsDialogOpen(true)}
-            className="rounded-full"
-          >
-            <PlusCircle className="h-4 w-4 mr-1" /> Find Players
-          </Button>
-        </div>
-        
-        {invitedUsers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {invitedUsers.map(user => (
-              <Card key={user.id} className="overflow-hidden">
-                <CardContent className="p-3 flex justify-between items-center">
-                  <div className="flex items-center">
-                    <Avatar className="h-10 w-10 mr-3">
-                      <img src={user.avatar} alt={user.name} />
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleInviteUser(user)}
-                  >
-                    <X className="h-4 w-4 text-destructive" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-muted/30 rounded-lg p-6 text-center">
-            <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-            <h4 className="text-lg font-medium">No Players Invited Yet</h4>
-            <p className="text-sm text-muted-foreground mb-4">Invite players to join your match</p>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsDialogOpen(true)}
-              className="rounded-full"
-            >
-              Find Players
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <div className="pt-8 flex justify-end">
-        <Button
-          onClick={onSubmitFinal}
-          disabled={invitedUsers.length === 0}
-          className="rounded-full"
-        >
-          <Trophy className="mr-2 h-4 w-4" />
-          Create Match
-        </Button>
-      </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Invite Players Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Invite Players</DialogTitle>
@@ -434,19 +378,12 @@ const CreateMatchForm = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
               Done
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-
-  // Render the appropriate step
-  return (
-    <div className="max-w-2xl mx-auto">
-      {step === 1 ? renderFirstStepForm() : renderInviteUsersForm()}
     </div>
   );
 };
