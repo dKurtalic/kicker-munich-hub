@@ -34,7 +34,10 @@ const formSchema = z.object({
     message: "Tournament needs at least 4 participants.",
   }).max(64, {
     message: "Maximum 64 participants allowed."
-  })
+  }),
+  format: z.enum(["single-elimination", "double-elimination", "round-robin", "swiss"], {
+    required_error: "Tournament format is required.",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,7 +61,8 @@ const CreateTournamentForm = ({ onTournamentCreated }: CreateTournamentFormProps
       startDate: new Date(),
       endDate: new Date(),
       location: "",
-      maxParticipants: 8
+      maxParticipants: 8,
+      format: "single-elimination",
     },
   });
 
@@ -266,8 +270,32 @@ const CreateTournamentForm = ({ onTournamentCreated }: CreateTournamentFormProps
               )}
             />
 
-       
-            
+            <FormField
+              control={form.control}
+              name="format"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tournament Format</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a format" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="single-elimination">Single Elimination</SelectItem>
+                      <SelectItem value="double-elimination">Double Elimination</SelectItem>
+                      <SelectItem value="round-robin">Round Robin</SelectItem>
+                      <SelectItem value="swiss">Swiss System</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    How matches will be organized.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="pt-4 flex justify-end">

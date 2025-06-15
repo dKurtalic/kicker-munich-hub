@@ -55,6 +55,7 @@ const InviteFriendsForm = ({
   const [invitedFriends, setInvitedFriends] = useState<typeof mockFriends>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const inviteLink = `https://kickertum.com/tournaments/${tournamentId}/join`;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -106,6 +107,15 @@ const InviteFriendsForm = ({
     setInvitedFriends(invitedFriends.filter(friend => friend.id !== friendId));
   };
 
+  const copyInviteLink = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({
+      title: "Link copied",
+      description: "Tournament invite link copied to clipboard.",
+    });
+  };
 
   const sendInvites = async () => {
     if (invitedFriends.length === 0) {
@@ -236,6 +246,25 @@ const InviteFriendsForm = ({
               <p className="text-sm text-muted-foreground">No friends added yet</p>
             </div>
           )}
+        </div>
+
+        <div className="pt-4 border-t border-border">
+          <p className="text-sm mb-2">Or share the invite link</p>
+          <div className="flex space-x-2">
+            <Input 
+              readOnly 
+              value={inviteLink} 
+              className="bg-muted/30 font-mono text-sm"
+            />
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={copyInviteLink}
+              className="shrink-0"
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
 

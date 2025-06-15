@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Check, X, MapPin, Euro, Table as TableIcon, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,8 +19,6 @@ export const mockTables = [
     condition: "Excellent",
     rating: 4.8,
     reviews: 24,
-    verificationCount: 8,
-    isVerified: true,
   },
   {
     id: 2,
@@ -33,8 +30,6 @@ export const mockTables = [
     condition: "Good",
     rating: 4.2,
     reviews: 18,
-    verificationCount: 6,
-    isVerified: true,
   },
   {
     id: 3,
@@ -47,8 +42,6 @@ export const mockTables = [
     condition: "Very Good",
     rating: 4.5,
     reviews: 32,
-    verificationCount: 12,
-    isVerified: true,
   },
   {
     id: 4,
@@ -60,8 +53,6 @@ export const mockTables = [
     condition: "Average",
     rating: 3.7,
     reviews: 12,
-    verificationCount: 3,
-    isVerified: false,
   },
   {
     id: 5,
@@ -74,8 +65,6 @@ export const mockTables = [
     condition: "Excellent",
     rating: 4.9,
     reviews: 41,
-    verificationCount: 7,
-    isVerified: true,
   },
 ];
 
@@ -90,29 +79,14 @@ const TablesList = () => {
     setSelectedTable(null);
   };
 
-  const handleVerifyTable = (tableId: number) => {
-    setTables(tables.map(table => {
-      if (table.id === tableId) {
-        const newVerificationCount = table.verificationCount + 1;
-        return {
-          ...table,
-          verificationCount: newVerificationCount,
-          isVerified: newVerificationCount >= 5
-        };
-      }
-      return table;
-    }));
-  };
-
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
         <div className="grid grid-cols-12 p-4 text-sm font-medium text-muted-foreground bg-muted/50">
-          <div className="col-span-3">Name & Location</div>
+          <div className="col-span-4">Name & Location</div>
           <div className="col-span-2">Condition</div>
           <div className="col-span-2">Features</div>
-          <div className="col-span-2">Verification</div>
-          <div className="col-span-1">Rating</div>
+          <div className="col-span-2">Rating</div>
           <div className="col-span-2">Actions</div>
         </div>
         
@@ -121,7 +95,7 @@ const TablesList = () => {
             key={table.id} 
             className="grid grid-cols-12 p-4 border-t items-center hover:bg-muted/10 transition-colors"
           >
-            <div className="col-span-3 flex items-center gap-3">
+            <div className="col-span-4 flex items-center gap-3">
               <Avatar className="h-10 w-10 bg-primary/10">
                 <AvatarFallback className="text-primary">
                   <TableIcon className="h-5 w-5" />
@@ -131,7 +105,7 @@ const TablesList = () => {
                 <p className="font-medium">{table.name}</p>
                 <div className="flex items-center text-sm text-muted-foreground mt-1">
                   <MapPin className="h-3 w-3 mr-1" />
-                  <span className="truncate">{table.address}</span>
+                  <span>{table.address}</span>
                 </div>
               </div>
             </div>
@@ -155,7 +129,7 @@ const TablesList = () => {
                     <Check className="h-4 w-4 text-green-500" />
                   }
                 </div>
-                <span className="truncate">{table.isPaid ? `Paid (${table.fee})` : "Free"}</span>
+                <span>{table.isPaid ? `Paid (${table.fee})` : "Free"}</span>
               </div>
               <div className="flex items-center text-sm">
                 <div className="w-6">
@@ -164,41 +138,15 @@ const TablesList = () => {
                     <X className="h-4 w-4 text-red-500" />
                   }
                 </div>
-                <span className="truncate">{table.hasBalls ? "Balls provided" : "Bring your own balls"}</span>
-              </div>
-            </div>
-
-            <div className="col-span-2">
-              <div className="space-y-1">
-                <Badge 
-                  variant={table.isVerified ? "default" : "secondary"}
-                  className="text-xs rounded-full px-2"
-                >
-                  {table.isVerified ? "Verified" : "Unverified"}
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  {table.verificationCount}/5 verifications
-                </p>
-                {!table.isVerified && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="text-xs h-6 px-2"
-                    onClick={() => handleVerifyTable(table.id)}
-                  >
-                    Verify
-                  </Button>
-                )}
+                <span>{table.hasBalls ? "Balls provided" : "Bring your own balls"}</span>
               </div>
             </div>
             
-            <div className="col-span-1">
+            <div className="col-span-2">
               <div className="flex items-center">
                 <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
-                <div>
-                  <span className="font-medium text-sm">{table.rating}</span>
-                  <p className="text-xs text-muted-foreground">({table.reviews})</p>
-                </div>
+                <span className="font-medium">{table.rating}</span>
+                <span className="text-muted-foreground ml-1">({table.reviews})</span>
               </div>
             </div>
             

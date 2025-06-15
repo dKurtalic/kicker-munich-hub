@@ -10,13 +10,12 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, MapPin, Trophy, Users, Clock, Check, Edit, Save} from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Trophy, Users, Clock, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import RecordResultForm from '@/components/match/RecordResultForm';
 import ConfirmResultForm from '@/components/match/ConfirmResultForm';
-import { useToast } from '@/hooks/use-toast';
 
 // Mock match data - in a real application this would come from an API
 const mockMatch = {
@@ -34,14 +33,14 @@ const mockMatch = {
       { id: "1", name: "Max Schmidt", avatar: "/placeholder.svg", elo: 1850 },
       { id: "2", name: "Sarah Wagner", avatar: "/placeholder.svg", elo: 1820 },
     ],
-    score: 0
+    score: 5
   },
   team2: {
     players: [
       { id: "3", name: "Tom Schmidt", avatar: "/placeholder.svg", elo: 1795 },
       { id: "4", name: "Maria Fischer", avatar: "/placeholder.svg", elo: 1780 },
     ],
-    score: 1
+    score: 3
   },
   submittedBy: "Max Schmidt",
   submittedAt: "2023-05-10T19:45:00Z",
@@ -51,29 +50,23 @@ const mockMatch = {
 
 const MatchDetailsPage = () => {
   const { id } = useParams();
-  const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const [match, setMatch] = useState(mockMatch);
   const [activeTab, setActiveTab] = useState("details");
-  const [isEditingScore, setIsEditingScore] = useState(false);
   
-  const [editableScores, setEditableScores] = useState({
-    team1Score: match.team1.score.toString() || "0",
-    team2Score: match.team2.score.toString() || "0"
-  });
   // In a real app, you would fetch the match data based on the ID
   
   const isCreator = isAuthenticated && user?.name === match.createdBy;
   const isParticipant = isAuthenticated && match.team1.players.concat(match.team2.players)
     .some(player => player.name === user?.name);
-  const canEditScore = isParticipant && match.resultStatus === "pending_confirmation";
-
+  
   // Changed: Allow any authenticated user to record results
   const canRecordResult = isAuthenticated && 
     match.status === "completed" && 
     !match.resultStatus;
   
-  const canConfirmResult = isParticipant && 
+  // Changed: Allow any authenticated user to confirm results, but not if they submitted it
+  const canConfirmResult = isAuthenticated && 
     match.status === "completed" && 
     match.resultStatus === "pending_confirmation" && 
     match.submittedBy !== user?.name;
@@ -93,54 +86,6 @@ const MatchDetailsPage = () => {
     });
     setActiveTab("details");
   };
-
-  const handleScoreEdit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handling scoring edit ")
-    setIsEditingScore(true);
-    const { name, value } = e.target;
-    setEditableScores(prev => ({
-    ...prev,
-    [name]: value,  // update the score being edited
-  }));
-};
-  
-
-  const handleScoreSave = () => {
-    const team1Score = parseInt(editableScores.team1Score);
-    const team2Score = parseInt(editableScores.team2Score);
-
-    if (isNaN(team1Score) || isNaN(team2Score) || team1Score < 0 || team2Score < 0) {
-      toast({
-        title: "Invalid Score",
-        description: "Please enter valid positive numbers for both scores.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (team1Score === team2Score) {
-      toast({
-        title: "Invalid Score", 
-        description: "Matches cannot end in a tie.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setMatch({
-      ...match,
-      team1: { ...match.team1, score: team1Score },
-      team2: { ...match.team2, score: team2Score }
-    });
-    
-    setIsEditingScore(false);
-    
-    toast({
-      title: "Score Updated",
-      description: "The match score has been updated successfully.",
-    });
-  };
-
   
   return (
     <div className="container mx-auto px-4 py-12 animate-fade-in">
@@ -277,28 +222,6 @@ const MatchDetailsPage = () => {
                             {match.team1.score} : {match.team2.score}
                           </div>
                           
-                          <div className="text-3xl font-bold flex items-center space-x-4">
-                            <input
-                              type="number"
-                              name="team1Score"
-                              value={editableScores.team1Score}
-                              onChange={handleScoreEdit}
-                              className="w-16 text-center text-3xl font-bold border-b-2 border-gray-400 focus:outline-none"
-                              min={0}
-                              style={{ color: 'black' }} 
-                            />
-                            <span>:</span>
-                            <input
-                              type="number"
-                              name="team2Score"
-                              value={editableScores.team2Score}
-                              onChange={handleScoreEdit}
-                              className="w-16 text-center text-3xl font-bold border-b-2 border-gray-400 focus:outline-none"
-                              min={0}
-                              style={{ color: 'black' }} 
-                            />
-                          </div>
-                          <Button className='rounded-full' onClick={handleScoreSave}> Submit result </Button>
                           <div className="mt-2 text-sm text-muted-foreground">
                             <Badge variant={
                               match.resultStatus === "confirmed" ? "secondary" :
