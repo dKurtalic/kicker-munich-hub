@@ -1,13 +1,17 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, Calendar, Trophy, Users, Target, TrendingUp, Crown, CreditCard } from 'lucide-react';
+import { AlertTriangle, Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DeleteAccountDialog from '@/components/profile/DeleteAccountDialog';
-import { Link } from 'react-router-dom';
+import ProfileStats from '@/components/profile/ProfileStats';
+import PremiumStatusCard from '@/components/profile/PremiumStatusCard';
+import RecentMatches from '@/components/profile/RecentMatches';
+import TournamentHistory from '@/components/profile/TournamentHistory';
 
 // Mock user data - in a real app this would come from an API
 const mockUserProfile = {
@@ -155,230 +159,29 @@ const ProfilePage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Target className="h-5 w-5 text-primary mr-2" />
-                      <span className="text-2xl font-bold">{mockUserProfile.elo}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">ELO Rating</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Trophy className="h-5 w-5 text-primary mr-2" />
-                      <span className="text-2xl font-bold">#{mockUserProfile.rank}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Rank</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Users className="h-5 w-5 text-primary mr-2" />
-                      <span className="text-2xl font-bold">{mockUserProfile.totalMatches}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Total Matches</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <TrendingUp className="h-5 w-5 text-primary mr-2" />
-                      <span className="text-2xl font-bold">{mockUserProfile.winRate}%</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Win Rate</p>
-                  </div>
-                </div>
+                <ProfileStats 
+                  elo={mockUserProfile.elo}
+                  rank={mockUserProfile.rank}
+                  totalMatches={mockUserProfile.totalMatches}
+                  winRate={mockUserProfile.winRate}
+                />
               </CardContent>
             </Card>
 
-            {/* Premium Status Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-yellow-500" />
-                    <CardTitle>Premium Status</CardTitle>
-                  </div>
-                  <Badge variant={mockSubscriptionData.isActive ? "secondary" : "outline"}>
-                    {mockSubscriptionData.isActive ? "Active" : "Free"}
-                  </Badge>
-                </div>
-                <CardDescription>
-                  {mockSubscriptionData.isActive 
-                    ? "You have access to all premium features"
-                    : "Upgrade to unlock premium features"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {mockSubscriptionData.isActive ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium">Current Plan</p>
-                        <p className="text-2xl font-bold">{mockSubscriptionData.plan}</p>
-                        <p className="text-sm text-muted-foreground">{mockSubscriptionData.price}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Next Billing Date</p>
-                        <p className="text-lg font-semibold">{new Date(mockSubscriptionData.nextBillingDate).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm font-medium mb-2">Premium Features</p>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {mockSubscriptionData.features.map((feature, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="flex gap-3 pt-2">
-                      <Button variant="outline" size="sm">
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Manage Billing
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleCancelSubscription}
-                      >
-                        Cancel Subscription
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium mb-2">Premium Features</p>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {mockSubscriptionData.features.map((feature, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">Upgrade to Premium</p>
-                          <p className="text-sm text-muted-foreground">€9.99/month</p>
-                        </div>
-                        <Button onClick={handleUpgradeToPremium}>
-                          <Crown className="h-4 w-4 mr-2" />
-                          Upgrade Now
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <PremiumStatusCard 
+              subscriptionData={mockSubscriptionData}
+              onCancelSubscription={handleCancelSubscription}
+              onUpgradeToPremium={handleUpgradeToPremium}
+            />
           </div>
         </TabsContent>
         
         <TabsContent value="matches">
-          <div className="grid gap-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">Recent Matches</h3>
-                <p className="text-sm text-muted-foreground">Your latest table tennis matches</p>
-              </div>
-              <Link to="/matches/create">
-                <Button>Create Match</Button>
-              </Link>
-            </div>
-            
-            <div className="space-y-4">
-              {mockRecentMatches.map((match) => (
-                <Card key={match.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4">
-                          <Badge variant={match.result === "Won" ? "secondary" : "outline"}>
-                            {match.type}
-                          </Badge>
-                          <div>
-                            <p className="font-medium">vs {match.opponent}</p>
-                            <p className="text-sm text-muted-foreground">{new Date(match.date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2">Score: {match.score}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant={match.result === "Won" ? "secondary" : "destructive"}
-                          className="mb-2"
-                        >
-                          {match.result}
-                        </Badge>
-                        <p className={`text-sm font-medium ${
-                          match.eloChange > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {match.eloChange > 0 ? '+' : ''}{match.eloChange} ELO
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="text-center">
-              <Button variant="outline">View All Matches</Button>
-            </div>
-          </div>
+          <RecentMatches matches={mockRecentMatches} />
         </TabsContent>
         
         <TabsContent value="tournaments">
-          <div className="grid gap-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">Tournament History</h3>
-                <p className="text-sm text-muted-foreground">Your tournament participation and results</p>
-              </div>
-              <Link to="/tournaments">
-                <Button>Browse Tournaments</Button>
-              </Link>
-            </div>
-            
-            <div className="space-y-4">
-              {mockTournaments.map((tournament) => (
-                <Card key={tournament.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4">
-                          <Trophy className="h-8 w-8 text-yellow-500" />
-                          <div>
-                            <p className="font-medium">{tournament.name}</p>
-                            <p className="text-sm text-muted-foreground">{new Date(tournament.date).toLocaleDateString()}</p>
-                            <p className="text-sm text-muted-foreground">{tournament.participants} participants</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="secondary" className="mb-2">
-                          {tournament.placement}
-                        </Badge>
-                        <p className="text-sm font-medium text-green-600">
-                          {tournament.prize}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="text-center">
-              <Button variant="outline">View All Tournaments</Button>
-            </div>
-          </div>
+          <TournamentHistory tournaments={mockTournaments} />
         </TabsContent>
         
         <TabsContent value="settings">
