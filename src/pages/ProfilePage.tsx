@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, Calendar, Trophy, Users, Target, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Calendar, Trophy, Users, Target, TrendingUp, Crown, CreditCard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -82,6 +81,33 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
 
+  // Mock subscription data - in a real app this would come from your backend
+  const mockSubscriptionData = {
+    isActive: user?.isPremium || false,
+    plan: 'Premium',
+    nextBillingDate: '2024-07-29',
+    price: '€9.99/month',
+    features: [
+      'Unlimited tournament entries',
+      'Advanced statistics',
+      'Priority table booking',
+      'Custom profile themes',
+      'Monthly progress reports'
+    ]
+  };
+
+  const handleCancelSubscription = () => {
+    // In a real app, this would call your backend to cancel the subscription
+    console.log('Canceling subscription...');
+    // You would implement the actual cancellation logic here
+  };
+
+  const handleUpgradeToPremium = () => {
+    // In a real app, this would redirect to your payment flow
+    console.log('Upgrading to premium...');
+    // You would implement the actual upgrade logic here
+  };
+
   return (
     <div className="container mx-auto px-4 py-12 animate-fade-in">
       <div className="flex justify-between items-center mb-8">
@@ -111,7 +137,15 @@ const ProfilePage = () => {
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
-                        <CardTitle className="text-2xl">{mockUserProfile.name}</CardTitle>
+                        <div className="flex items-center gap-2 mb-1">
+                          <CardTitle className="text-2xl">{mockUserProfile.name}</CardTitle>
+                          {user?.isPremium && (
+                            <Badge variant="secondary" className="flex items-center gap-1">
+                              <Crown className="h-3 w-3" />
+                              Premium
+                            </Badge>
+                          )}
+                        </div>
                         <CardDescription>{mockUserProfile.email}</CardDescription>
                         <p className="text-sm text-muted-foreground mt-2">{mockUserProfile.bio}</p>
                       </div>
@@ -151,6 +185,96 @@ const ProfilePage = () => {
                     <p className="text-sm text-muted-foreground">Win Rate</p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Premium Status Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-yellow-500" />
+                    <CardTitle>Premium Status</CardTitle>
+                  </div>
+                  <Badge variant={mockSubscriptionData.isActive ? "secondary" : "outline"}>
+                    {mockSubscriptionData.isActive ? "Active" : "Free"}
+                  </Badge>
+                </div>
+                <CardDescription>
+                  {mockSubscriptionData.isActive 
+                    ? "You have access to all premium features"
+                    : "Upgrade to unlock premium features"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {mockSubscriptionData.isActive ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium">Current Plan</p>
+                        <p className="text-2xl font-bold">{mockSubscriptionData.plan}</p>
+                        <p className="text-sm text-muted-foreground">{mockSubscriptionData.price}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Next Billing Date</p>
+                        <p className="text-lg font-semibold">{new Date(mockSubscriptionData.nextBillingDate).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm font-medium mb-2">Premium Features</p>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {mockSubscriptionData.features.map((feature, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-2">
+                      <Button variant="outline" size="sm">
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Manage Billing
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCancelSubscription}
+                      >
+                        Cancel Subscription
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium mb-2">Premium Features</p>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {mockSubscriptionData.features.map((feature, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Upgrade to Premium</p>
+                          <p className="text-sm text-muted-foreground">€9.99/month</p>
+                        </div>
+                        <Button onClick={handleUpgradeToPremium}>
+                          <Crown className="h-4 w-4 mr-2" />
+                          Upgrade Now
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
