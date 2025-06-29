@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,9 @@ import ProfileStats from '@/components/profile/ProfileStats';
 import PremiumStatusCard from '@/components/profile/PremiumStatusCard';
 import RecentMatches from '@/components/profile/RecentMatches';
 import TournamentHistory from '@/components/profile/TournamentHistory';
+import CancelSubscriptionDialog from '@/components/profile/CancelSubscriptionDialog';
+import ManageBillingDialog from '@/components/profile/ManageBillingDialog';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock user data - in a real app this would come from an API
 const mockUserProfile = {
@@ -83,7 +85,10 @@ const mockTournaments = [
 
 const ProfilePage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [showCancelSubscriptionDialog, setShowCancelSubscriptionDialog] = useState(false);
+  const [showManageBillingDialog, setShowManageBillingDialog] = useState(false);
 
   // Mock subscription data - in a real app this would come from your backend
   const mockSubscriptionData = {
@@ -100,16 +105,92 @@ const ProfilePage = () => {
     ]
   };
 
+  // Mock billing info for the manage billing dialog
+  const mockBillingInfo = {
+    plan: 'Premium',
+    price: '€9.99/month',
+    nextBillingDate: '2024-07-29',
+    billingInterval: 'monthly',
+    paymentMethod: {
+      type: 'visa',
+      last4: '4242',
+      expiryMonth: 8,
+      expiryYear: 2027
+    },
+    billingHistory: [
+      {
+        id: 'inv_001',
+        date: '2024-06-29',
+        amount: '€9.99',
+        status: 'paid' as const,
+        invoiceUrl: '#'
+      },
+      {
+        id: 'inv_002',
+        date: '2024-05-29',
+        amount: '€9.99',
+        status: 'paid' as const,
+        invoiceUrl: '#'
+      },
+      {
+        id: 'inv_003',
+        date: '2024-04-29',
+        amount: '€9.99',
+        status: 'paid' as const,
+        invoiceUrl: '#'
+      }
+    ]
+  };
+
   const handleCancelSubscription = () => {
+    setShowCancelSubscriptionDialog(true);
+  };
+
+  const handleConfirmCancelSubscription = () => {
     // In a real app, this would call your backend to cancel the subscription
     console.log('Canceling subscription...');
-    // You would implement the actual cancellation logic here
+    toast({
+      title: "Subscription Canceled",
+      description: "Your subscription has been canceled. You'll retain access until your next billing date.",
+    });
+  };
+
+  const handleManageBilling = () => {
+    setShowManageBillingDialog(true);
   };
 
   const handleUpgradeToPremium = () => {
     // In a real app, this would redirect to your payment flow
     console.log('Upgrading to premium...');
-    // You would implement the actual upgrade logic here
+    toast({
+      title: "Redirecting to checkout...",
+      description: "Please complete your payment to upgrade to Premium.",
+    });
+  };
+
+  const handleUpdatePaymentMethod = () => {
+    // In a real app, this would redirect to Stripe's payment method update flow
+    console.log('Updating payment method...');
+    toast({
+      title: "Redirecting...",
+      description: "Opening payment method update form.",
+    });
+  };
+
+  const handleDownloadInvoice = (invoiceId: string) => {
+    console.log('Downloading invoice:', invoiceId);
+    toast({
+      title: "Download Started",
+      description: "Your invoice is being downloaded.",
+    });
+  };
+
+  const handleViewInvoice = (invoiceId: string) => {
+    console.log('Viewing invoice:', invoiceId);
+    toast({
+      title: "Opening Invoice",
+      description: "Invoice will open in a new tab.",
+    });
   };
 
   return (
@@ -263,6 +344,26 @@ const ProfilePage = () => {
       <DeleteAccountDialog 
         open={showDeleteAccountDialog} 
         onOpenChange={setShowDeleteAccountDialog} 
+      />
+      
+      <CancelSubscriptionDialog
+        open={showCancelSubscriptionDialog}
+        onOpenChange={setShowCancelSubscriptionDialog}
+        onConfirmCancel={handleConfirmCancelSubscription}
+        subscriptionData={{
+          plan: mockSubscriptionData.plan,
+          nextBillingDate: mockSubscriptionData.nextBillingDate,
+          price: mockSubscriptionData.price
+        }}
+      />
+      
+      <ManageBillingDialog
+        open={showManageBillingDialog}
+        onOpenChange={setShowManageBillingDialog}
+        billingInfo={mockBillingInfo}
+        onUpdatePaymentMethod={handleUpdatePaymentMethod}
+        onDownloadInvoice={handleDownloadInvoice}
+        onViewInvoice={handleViewInvoice}
       />
     </div>
   );

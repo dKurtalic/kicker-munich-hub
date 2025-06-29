@@ -16,12 +16,14 @@ interface PremiumStatusCardProps {
   subscriptionData: SubscriptionData;
   onCancelSubscription: () => void;
   onUpgradeToPremium: () => void;
+  onManageBilling?: () => void;
 }
 
 const PremiumStatusCard = ({ 
   subscriptionData, 
   onCancelSubscription, 
-  onUpgradeToPremium 
+  onUpgradeToPremium,
+  onManageBilling
 }: PremiumStatusCardProps) => {
   return (
     <Card>
@@ -69,7 +71,7 @@ const PremiumStatusCard = ({
             </div>
             
             <div className="flex gap-3 pt-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={onManageBilling}>
                 <CreditCard className="h-4 w-4 mr-2" />
                 Manage Billing
               </Button>
