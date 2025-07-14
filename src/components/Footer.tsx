@@ -58,14 +58,14 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">Info</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-2">
-                  <Info className="h-4 w-4" /> About Us
-                </a>
+                <Link to="/terms" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-2">
+                  <Info className="h-4 w-4" /> Terms of Service
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> Contact
-                </a>
+                <Link to="/privacy" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-2">
+                  <Mail className="h-4 w-4" /> Privacy Policy
+                </Link>
               </li>
             </ul>
           </div>

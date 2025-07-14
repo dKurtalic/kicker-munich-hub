@@ -20,6 +20,8 @@ import MatchDetailsPage from "./pages/MatchDetailsPage";
 import TournamentDetailsPage from "./pages/TournamentDetailsPage";
 import CreateTournamentPage from "./pages/CreateTournamentPage";
 import CreateMatchPage from "./pages/CreateMatchPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/matches/create" element={<CreateMatchPage />} />
               <Route path="/matches/:id" element={<MatchDetailsPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
