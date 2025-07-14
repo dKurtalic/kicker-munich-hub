@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import NotLoggedInProfilePage from './NotLoggedInProfilePage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DeleteAccountDialog from '@/components/profile/DeleteAccountDialog';
@@ -84,7 +85,12 @@ const mockTournaments = [
 ];
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+
+  // Show not logged in page if user is not authenticated
+  if (!isAuthenticated) {
+    return <NotLoggedInProfilePage />;
+  }
   const { toast } = useToast();
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showCancelSubscriptionDialog, setShowCancelSubscriptionDialog] = useState(false);

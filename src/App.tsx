@@ -22,6 +22,8 @@ import CreateTournamentPage from "./pages/CreateTournamentPage";
 import CreateMatchPage from "./pages/CreateMatchPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/matches/create" element={<CreateMatchPage />} />
               <Route path="/matches/:id" element={<MatchDetailsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="*" element={<NotFound />} />
