@@ -5,7 +5,61 @@ import { ArrowRight, Trophy, Map, User, Star, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  // Show personalized greeting for logged-in users
+  if (isAuthenticated && user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Greeting */}
+            <div className="text-center lg:text-left">
+              <div className="inline-block mb-6">
+                <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary to-primary/70 mb-4">
+                  Hello
+                </h1>
+                <h2 className="text-4xl md:text-6xl font-bold text-foreground">
+                  {user.name}!
+                </h2>
+              </div>
+              <p className="text-xl text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
+                Welcome back to KickerTUM. Ready to dominate the tables today?
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-all">
+                  <Link to="/profile">
+                    View Your Profile <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-full">
+                  <Link to="/tournaments">Browse Tournaments</Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Right side - Waving Robot */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative">
+                {/* Robot placeholder with wave animation */}
+                <div className="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center border-2 border-primary/20 shadow-2xl">
+                  <div className="text-center">
+                    {/* Simple robot emoji with wave animation as placeholder */}
+                    <div className="text-8xl md:text-9xl animate-bounce">🤖</div>
+                    <div className="text-6xl md:text-7xl animate-[wave_1s_ease-in-out_infinite] origin-bottom-right inline-block mt-4">👋</div>
+                  </div>
+                </div>
+                
+                {/* Decorative elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full animate-pulse"></div>
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary/30 rounded-full animate-pulse delay-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const features = [
     {

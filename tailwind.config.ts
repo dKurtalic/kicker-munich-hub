@@ -91,12 +91,21 @@ export default {
           from: { transform: "translateY(10px)", opacity: "0" },
           to: { transform: "translateY(0)", opacity: "1" },
         },
+        "wave": {
+          "0%": { transform: "rotate(0deg)" },
+          "20%": { transform: "rotate(14deg)" },
+          "40%": { transform: "rotate(-8deg)" },
+          "60%": { transform: "rotate(14deg)" },
+          "80%": { transform: "rotate(-4deg)" },
+          "100%": { transform: "rotate(0deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
+        "wave": "wave 1s ease-in-out infinite",
       },
       boxShadow: {
         'ios': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',
